@@ -14,26 +14,12 @@ using namespace caf;
 using namespace std::literals;
 using namespace std;
 
-// constexpr std::string_view example_input = R"([
-//   {
-//     "id": 1,
-//     "name": "John Doe"
-//   },
-//   {
-//     "id": 2,
-//     "name": "Jane Doe",
-//     "email": "jane@doe.com"
-//   }
-// ])";
-
 struct user {
   uint32_t id;
   std::string name;
   std::string email;
-  std::string payload;
-  //std::optional<std::string> email;
-  user(uint32_t ID=0, string Name="", string Email="", string Payload=""):id(ID),name(Name),email(Email), payload(Payload){}
-  //user(uint32_t ID, string Name, string Email):id(ID),name(Name),email(Email){}
+  std::string payload;  
+  user(uint32_t ID=0, string Name="", string Email="", string Payload=""):id(ID),name(Name),email(Email), payload(Payload){}  
   user(const user&) = default;
   user& operator=(const user&) = default;
 };
@@ -43,9 +29,6 @@ struct result_j {
   uint32_t b;
   string c;
   vector<int> d;
-  // result(uint32_t a_=0, uint32_t b_=0):a(a_),b(b_){}  
-  // result(const result&) = default;
-  // result& operator=(const result&) = default;
 };
 
 
@@ -72,8 +55,7 @@ behavior mirror(event_based_actor* self) {
   return {
     // a handler for messages containing a single string
     // that replies with a string
-    [self](const user& what){
-      //struct user jane=what;            
+    [self](const user& what){      
       struct result_j payload;
       aout(self).println(" \"id\": {}, \"name\": {}, \"email\": {}", what.id, what.name, what.email);
       caf::json_reader reader;      
@@ -90,7 +72,7 @@ behavior mirror(event_based_actor* self) {
           aout(self).println("in vector:{}", i);
         }
       }else{
-        aout(self).println("failed to parse json: ",  reader.get_error());
+        aout(self).println("failed to parse json: {}",  reader.get_error());
       }
     },
     [self](const std::string& what) -> std::string {
@@ -103,19 +85,9 @@ behavior mirror(event_based_actor* self) {
 }
 
 void hello_world(event_based_actor* self, const actor& buddy) {
-  // send "Hello World!" to our buddy ...
-  // self->request(buddy, 10s, "Hello World!")
-  //   .then(
-  //     // ... wait up to 10s for a response ...
-  //     [self](const std::string& what) {
-  //       // ... and print it
-  //       aout(self).println("{}", what);
-  //     });
-
   caf::json_writer writer;
   vector<int> d{1,2,3,4};
   struct result_j res{85, 95, "This is the score", d};
-  //string payload;
   if(!writer.apply(res)){
       std::cerr << "failed to generate JSON output: "
                     << to_string(writer.get_error()) << '\n';
